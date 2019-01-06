@@ -27,4 +27,6 @@ python drag_files_do_event.py
 
 ### Demo
 
+Trash_demo.exe
+
 当前程序运行效果为删除文件功能，拖拽文件到窗口即可删除相应文件或文件夹
