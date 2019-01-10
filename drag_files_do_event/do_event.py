@@ -13,7 +13,7 @@ def event_for_file(filename):
 def event_for_dir(dir):
     try:
         for filename in glob(dir+'/*'):
-            print(filename)
+            # print(filename)
             if os.path.isfile(filename):
                 os.remove(filename)
             elif os.path.isdir(filename):
