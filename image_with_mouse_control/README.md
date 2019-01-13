@@ -22,6 +22,6 @@ python image_with_mouse_control.py
 
 ### Demo
 
-![](img/Demo_1.png)
+![](img/demo_1.png)
 
-![](img/Demo_2.png)
+![](img/demo_2.png)
