@@ -14,6 +14,10 @@
 - python 2.x or 3.x
 - PyQt5
 
+```python
+python pip install PyQt5
+```
+
 ### 运行方式：
 
 ```python
