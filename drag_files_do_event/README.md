@@ -20,7 +20,7 @@ do_event.py 包含两个方法：
 - PyQt5
 
 ```python
-python pip install PyQt5
+pip install PyQt5
 ```
 
 
