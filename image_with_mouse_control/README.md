@@ -15,7 +15,7 @@
 - PyQt5
 
 ```python
-python pip install PyQt5
+pip install PyQt5
 ```
 
 ### 运行方式：
