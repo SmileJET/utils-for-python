@@ -11,7 +11,7 @@
 
 ### 运行环境：
 
-- python 2.x or 3.x
+- python 3.x
 - PyQt5
 
 ```python

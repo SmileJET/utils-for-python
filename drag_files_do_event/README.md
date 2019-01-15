@@ -16,7 +16,7 @@ do_event.py 包含两个方法：
 
 ### 运行环境：
 
-- python 2.x or 3.x
+- python 3.x
 - PyQt5
 
 ```python
