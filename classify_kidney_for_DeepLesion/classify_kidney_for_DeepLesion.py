@@ -32,7 +32,11 @@ class Main(QWidget):
         self.setMinimumSize(1000, 800)
         self.setWindowTitle('label')
 
+        self.class_name = ['未分类', 'kidney', '其他类别']
         self.cur_class = 0              # 当前类别
+        self.handled_num = 0           # 当前已标注图片数目
+        self.image_total_num = 0        # 处理图片的总量
+
         self.qList = []                 # 当前view list
         self.cur_image_idx = 0          # 当前图片文件id
 
@@ -44,11 +48,13 @@ class Main(QWidget):
 
         # json文件名称
         # 存储标注文件列表的清单
-        self.dir_paths_filename = 'dir_paths.json'
+        self.dir_paths_filename = 'anno/dir_paths.json'
         # 当前标注文件
         self.annotation_filename = None
 
         # 标注文件dict
+        if not os.path.exists('anno'):
+            os.makedirs('anno')
         if os.path.exists(self.dir_paths_filename):
             self.dir_paths_dict = load_dict(self.dir_paths_filename)
         else:
@@ -56,6 +62,7 @@ class Main(QWidget):
 
         # # 假设选择了目录
         # self.update_dir_path(dir_path='../000001_01_01')
+        # self.update_dir_path(dir_path='D:\\Dataset\\DeepLesion\\Key_slices')
 
     def initUI(self):
         self.grid = QGridLayout()
@@ -70,6 +77,16 @@ class Main(QWidget):
         self.init_radio_button()
         # 初始化上下页按钮
         self.init_control_control()
+
+        self.class_label = QLabel('')
+        self.class_label.setAlignment(Qt.AlignCenter)
+        self.class_label.setFont(QFont("Roman times", 26, QFont.Bold))
+        self.grid.addWidget(self.class_label, 9, 3, 2, 4)
+
+        self.num_label = QLabel('')
+        self.num_label.setAlignment(Qt.AlignLeft)
+        self.num_label.setFont(QFont("Roman times", 16))
+        self.grid.addWidget(self.num_label, 9, 1, 1, 1)
 
     def init_list_view(self):
         # 实例化列表视图
@@ -98,8 +115,16 @@ class Main(QWidget):
 
         self.button_group = QButtonGroup(self)
         self.button_0 = QPushButton('未分类', self)
-        self.button_1 = QPushButton('kidney', self)
-        self.button_2 = QPushButton('其他类别', self)
+        self.button_1 = QPushButton('kidney(A)', self)
+        self.button_2 = QPushButton('其他类别(B)', self)
+
+        self.button_0.setFont(QFont("Roman times", 20))
+        self.button_1.setFont(QFont("Roman times", 20))
+        self.button_2.setFont(QFont("Roman times", 20))
+
+        self.button_0.resize(self.button_0.sizeHint())
+        self.button_1.resize(self.button_1.sizeHint())
+        self.button_2.resize(self.button_2.sizeHint())
 
         self.button_0.setCheckable(True)
         self.button_1.setCheckable(True)
@@ -111,29 +136,50 @@ class Main(QWidget):
 
         self.button_0.setChecked(True)
 
-        self.grid.addWidget(self.button_0, 2, 9, 1, 2)
-        self.grid.addWidget(self.button_1, 3, 9, 1, 2)
-        self.grid.addWidget(self.button_2, 4, 9, 1, 2)
+        self.grid.addWidget(self.button_0, 2, 9, 1, 4)
+        self.grid.addWidget(self.button_1, 3, 9, 1, 4)
+        self.grid.addWidget(self.button_2, 4, 9, 1, 4)
 
         self.button_0.clicked.connect(self.btnclicked)
         self.button_1.clicked.connect(self.btnclicked)
         self.button_2.clicked.connect(self.btnclicked)
+
+        self.button_1.setShortcut(Qt.Key_A)
+        self.button_2.setShortcut(Qt.Key_B)
+
+        self.button_0.setEnabled(False)
+        self.button_1.setEnabled(False)
+        self.button_2.setEnabled(False)
 
     def init_control_control(self):
         '''
         初始化控制键
         '''
         self.open_dir = QPushButton('打开目录', self)
-        self.pre_image = QPushButton('上一张', self)
-        self.next_image = QPushButton('下一张', self)
+        self.pre_image = QPushButton('上一张(UP)', self)
+        self.next_image = QPushButton('下一张(DOWN)', self)
 
-        self.grid.addWidget(self.open_dir, 6, 9, 1, 2)
-        self.grid.addWidget(self.pre_image, 7, 9, 1, 2)
-        self.grid.addWidget(self.next_image, 8, 9, 1, 2)
+        self.open_dir.setFont(QFont("Roman times", 20))
+        self.pre_image.setFont(QFont("Roman times", 20))
+        self.next_image.setFont(QFont("Roman times", 20))
+
+        self.open_dir.resize(self.open_dir.sizeHint())
+        self.pre_image.resize(self.pre_image.sizeHint())
+        self.next_image.resize(self.next_image.sizeHint())
+
+        self.grid.addWidget(self.open_dir, 6, 9, 1, 4)
+        self.grid.addWidget(self.pre_image, 7, 9, 1, 4)
+        self.grid.addWidget(self.next_image, 8, 9, 1, 4)
 
         self.open_dir.clicked.connect(self.btnclicked)
         self.pre_image.clicked.connect(self.btnclicked)
         self.next_image.clicked.connect(self.btnclicked)
+
+        self.pre_image.setShortcut(Qt.Key_Up)
+        self.next_image.setShortcut(Qt.Key_Down)
+
+        self.pre_image.setEnabled(False)
+        self.next_image.setEnabled(False)
 
     def btnclicked(self):
         '''
@@ -144,17 +190,21 @@ class Main(QWidget):
             # class 0
             self.cur_class = 0
             self.annotation_dict[self.qList[self.cur_image_idx]] = 0
+            self.handled_num-=1
             save_dict(self.annotation_filename, self.annotation_dict)
+            self.do_next_image()
         elif sender == self.button_1:
             # class 1
             self.cur_class = 1
             self.annotation_dict[self.qList[self.cur_image_idx]] = 1
+            self.handled_num += 1
             save_dict(self.annotation_filename, self.annotation_dict)
             self.do_next_image()
         elif sender == self.button_2:
             # class 2
             self.cur_class = 2
             self.annotation_dict[self.qList[self.cur_image_idx]] = 2
+            self.handled_num += 1
             save_dict(self.annotation_filename, self.annotation_dict)
             self.do_next_image()
         elif sender == self.pre_image:
@@ -166,7 +216,8 @@ class Main(QWidget):
         elif sender == self.open_dir:
             # open dir
             dir_path = QFileDialog.getExistingDirectory(self, 'Open Dirs')
-            self.update_dir_path(dir_path)
+            if dir_path.strip() != '':
+                self.update_dir_path(dir_path)
 
     def update_dir_path(self, dir_path):
         '''
@@ -177,16 +228,20 @@ class Main(QWidget):
             self.annotation_filename = self.dir_paths_dict[dir_path]
             self.annotation_dict = load_dict(self.annotation_filename)
             self.qList = list(self.annotation_dict.keys())
+            tmp_val = np.array(list(self.annotation_dict.values()))
+            self.handled_num = len(tmp_val[tmp_val!=0])
         else:
             # 当前目录没有处理过，创建新的标注文件
-            self.annotation_filename = 'anno_%d.json'%(len(glob('./anno_*.json')))
+            self.annotation_filename = 'anno/anno_%d.json'%(len(glob('anno/anno_*.json')))
             self.dir_paths_dict[dir_path] = self.annotation_filename
             self.annotation_dict = {}
             self.qList = os.listdir(dir_path)
+            self.handled_num = 0
             # 默认为目录下全部文件为要标注的CT图片文件
             for i in range(len(self.qList)):
                 self.qList[i] = os.path.join(dir_path, self.qList[i]).replace('\\', '/')
                 self.annotation_dict[self.qList[i]] = 0
+        self.image_total_num = len(self.qList)
         # 保存存储标注信息的词典
         save_dict(self.dir_paths_filename, self.dir_paths_dict)
         save_dict(self.annotation_filename, self.annotation_dict)
@@ -195,6 +250,13 @@ class Main(QWidget):
         self.init_list_view()
         self.cur_image_idx = 0
         self.load_image()
+
+        self.button_0.setEnabled(True)
+        self.button_1.setEnabled(True)
+        self.button_2.setEnabled(True)
+        self.next_image.setEnabled(True)
+        self.pre_image.setEnabled(True)
+
         self.update()
 
     def load_image(self):
@@ -211,6 +273,11 @@ class Main(QWidget):
             self.image_view.set_image(image_path)
             # 高亮当前类别的按钮
             eval('self.button_%d.setChecked(True)'%(self.cur_class))
+
+            self.class_label.setText(self.class_name[self.cur_class])
+
+            self.num_label.setText('待标注：%d/%d'%(self.handled_num, self.image_total_num))
+            self.update()
 
     def do_next_image(self):
         '''
@@ -257,9 +324,9 @@ class ImageWithMouseControl(QWidget):
         if path is None:
             return
         img = Image.open(path)
-        img = np.array(img)
-        img -= 32768
-        img = Image.fromarray(img)
+        # img = np.array(img)
+        # img -= 32768
+        # img = Image.fromarray(img)
         img = img.convert("RGB")
         data = img.tobytes("raw", "RGB")
         img = QImage(data, img.size[0], img.size[1], QImage.Format_RGB888)
