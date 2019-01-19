@@ -1,6 +1,9 @@
 # Utils-for-python
 
-整理自己平时写python时用到的工具
+博客地址：[https://blog.csdn.net/u014657795](https://blog.csdn.net/u014657795)
+
+菜鸟一枚，整理自己平时写python时用到的工具，方便自己使用也希望能帮助到他人
+欢迎大家给予意见或建议~
 
 ## PyQt5:
 
