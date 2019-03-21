@@ -1,6 +1,10 @@
 # Get City Info
 
- 爬取全国行政区，默认为爬取五级行政区。爬取因为网络等原因导致部分数据爬取失败，爬取失败的数据存储在error_list.txt中。
+爬取全国行政区，默认为爬取五级行政区。爬取因为网络等原因导致部分数据爬取失败，爬取失败的数据存储在error_list.txt中。
+
+### 数据来源：
+
+[国家统计局官网](http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/)
 
 ### 运行环境：
 
