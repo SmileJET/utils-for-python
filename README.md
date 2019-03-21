@@ -16,3 +16,6 @@
 
 - [[pytorch_template](pytorch_template)] pytorch代码模版
 
+## Others
+
+- [[get_city_info](get_city_info)] 爬取全国行政区
